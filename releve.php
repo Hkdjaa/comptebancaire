@@ -1,3 +1,29 @@
+<?php
+// releve.php
+
+require_once 'connexion.php';
+
+class Client {
+    protected $connect;
+
+    public function __construct($connect) {
+        $this->connect = $connect;
+    }
+
+    public function getMatchingClients($search) {
+        $sql = "SELECT * FROM Client WHERE Nom_client LIKE :search OR Prenom_client LIKE :search";
+        $stmt = $this->connect->prepare($sql);
+        $stmt->execute(['search' => "%$search%"]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
+// Instanciation de la classe Client avec la connexion à la base de données
+$clientManager = new Client($connect);
+
+?>
+
+
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -33,13 +59,10 @@
                     <p>Ici vous pouvez consulter le relevé d'un compte</p>
                     <p>Entrez le nom ou le prénom du client afin d'apercevoir son porte-feuille</p>
                     <br>
-
                     <label for="client">Saisissez l'identifiant du client :</label>
-                    <input type="text" id="client" onkeyup="rechercherClients()" placeholder="Rechercher un client" style="width: 200px;">
-
-                    <select id="clientsList" onchange="afficherInformationsClient(this.value)" style="display:none;"></select>
-
-                    <div id="informationsClient"></div>
+    <input type="text" id="client" onkeyup="rechercherClients()" placeholder="Rechercher un client" style="width: 200px;">
+    <select id="clientsList" style="display:none;"></select>
+    <div id="informationsClient"></div>
                 </div>
                 <span class="image object">
                     <img src="images/pic03.jpg" alt="" />
@@ -112,30 +135,25 @@
 <script src="assets/js/main.js"></script>
 <!-- Incluez jQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-<script>
-    $(document).ready(function() {
-        // Lorsque l'utilisateur tape dans le champ de recherche
-        $('#client').on('keyup', function() {
-            var searchText = $(this).val(); // Récupérer le texte saisi par l'utilisateur
+    <script>
+        function rechercherClients() {
+            var searchText = $('#client').val();
             if (searchText !== '') {
-                // Faire une requête AJAX pour récupérer les clients correspondants
                 $.ajax({
-                    url: 'get_clients.php', // L'URL où vous récupérez les clients
+                    url: 'releve_search_clients.php',
                     method: 'GET',
-                    data: {search: searchText}, // Envoyer le texte de recherche au serveur
+                    data: { search: searchText },
                     dataType: 'json',
                     success: function(response) {
                         var clientsList = $('#clientsList');
-                        clientsList.empty(); // Vider la liste déroulante
+                        clientsList.empty();
                         if (response.length > 0) {
-                            // Ajouter chaque client à la liste déroulante
                             $.each(response, function(index, client) {
-                                clientsList.append('<option value="' + client.id + '">' + client.nom + ' ' + client.prenom + '</option>');
+                                clientsList.append('<option value="' + client.ID_client + '">' + client.Nom_client + ' ' + client.Prenom_client + '</option>');
                             });
-                            clientsList.show(); // Afficher la liste déroulante
+                            clientsList.show();
                         } else {
-                            clientsList.hide(); // Masquer la liste déroulante s'il n'y a pas de correspondance
+                            clientsList.hide();
                         }
                     },
                     error: function(xhr, status, error) {
@@ -143,33 +161,15 @@
                     }
                 });
             } else {
-                $('#clientsList').hide(); // Masquer la liste déroulante si le champ de recherche est vide
+                $('#clientsList').hide();
             }
-        });
+        }
 
-        // Lorsque l'utilisateur sélectionne un client dans la liste déroulante
-        $('#clientsList').on('change', function() {
-            var clientId = $(this).val();
-            afficherInformationsClient(clientId);
-        });
-    });
-
-    function afficherInformationsClient(clientId) {
-        var informationsClient = $('#informationsClient');
-        // Faire une requête AJAX pour afficher les informations du client sélectionné
-        $.ajax({
-            url: 'get_client_info.php',
-            method: 'GET',
-            data: {id: clientId},
-            success: function(response) {
-                informationsClient.html(response);
-            },
-            error: function(xhr, status, error) {
-                console.error('Erreur lors de la requête AJAX : ' + error);
-            }
-        });
-    }
-</script>
+        // Fonction pour afficher les informations du client sélectionné
+        function afficherInformationsClient(clientId) {
+            // Faire une autre requête AJAX pour récupérer les informations du client et les afficher dans #informationsClient
+        }
+    </script>
 
 
 </body>
