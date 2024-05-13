@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $query->execute(['login' => $login, 'password' => $password]);
                 $user = $query->fetch();
             }
-
+				
             if ($user) {
                 $_SESSION['login'] = $login; 
                 $_SESSION['role'] = $user['role'];
