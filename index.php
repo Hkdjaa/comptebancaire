@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     header("Location: prof.php");
                     exit();
                 } elseif ($user['role'] === "admin") {
-                    header("Location: acceuil.php");
+                    header("Location: accueil.php");
                     exit();
                 }
             } else {
